@@ -79,15 +79,38 @@ class ProductsProvider with ChangeNotifier {
     return _products.firstWhere((product) => product.id == id);
   }
 
-  void updateProduct(String id, Product newProduct) {
+  Future<void> updateProduct(String id, Product newProduct) async {
+    final url = Uri.parse(
+        'https://course-udemy-max-default-rtdb.firebaseio.com/products/$id.json');
+    await http.patch(url,
+        body: json.encode({
+          'title': newProduct.title,
+          'price': newProduct.price,
+          'description': newProduct.description,
+          'imageUrl': newProduct.imageUrl
+        }));
+
     var index = _products.indexWhere((element) => element.id == id);
+
     _products[index] = newProduct;
 
     notifyListeners();
   }
 
-  void deleteProduct(String id) {
+  Future<void> deleteProduct(String id) async {
+    final url = Uri.parse(
+        'https://course-udemy-max-default-rtdb.firebaseio.com/products/$id.json');
+    var index = _products.indexWhere((element) => element.id == id);
+    Product? deletedProduct = _products[index];
     _products.removeWhere((element) => element.id == id);
+    await http.delete(url).then((response) {
+      if (response.statusCode >= 400) {
+        _products.insert(index, deletedProduct!);
+      } else {
+        deletedProduct = null;
+      }
+    });
+
     notifyListeners();
   }
 

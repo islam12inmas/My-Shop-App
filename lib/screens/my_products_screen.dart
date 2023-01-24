@@ -14,6 +14,10 @@ class MyProductsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var productsData = Provider.of<ProductsProvider>(context);
+    Future<void> _refreshProducts() async {
+      await Provider.of<ProductsProvider>(context, listen: false)
+          .fetchProducts();
+    }
 
     return Scaffold(
       drawer: Drawer(
@@ -54,14 +58,18 @@ class MyProductsScreen extends StatelessWidget {
             },
             icon: const Icon(Icons.add))
       ]),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: ListView.builder(
-          itemBuilder: (ctx, i) => ManageProductsItem(
-              id: productsData.products[i].id,
-              title: productsData.products[i].title,
-              imageUrl: productsData.products[i].imageUrl),
-          itemCount: productsData.products.length,
+      body: RefreshIndicator(
+        onRefresh: _refreshProducts,
+
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: ListView.builder(
+            itemBuilder: (ctx, i) => ManageProductsItem(
+                id: productsData.products[i].id,
+                title: productsData.products[i].title,
+                imageUrl: productsData.products[i].imageUrl),
+            itemCount: productsData.products.length,
+          ),
         ),
       ),
     );

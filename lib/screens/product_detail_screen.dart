@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:max_udemy_course/data/state_management/providers/products.dart';
 import 'package:max_udemy_course/reusable_components/custom_container.dart';
 import 'package:max_udemy_course/reusable_components/custom_text.dart';
+import 'package:provider/provider.dart';
 
 
 
@@ -12,7 +13,7 @@ class ProductDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var loadedProduct = ProductsProvider().findByID(id!);
+    var loadedProduct = Provider.of<ProductsProvider>(context , listen: false).findByID(id!);
     return Scaffold(
       appBar: AppBar(
         title: Text(loadedProduct.title!),
