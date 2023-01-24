@@ -111,6 +111,7 @@ class ProductsProvider with ChangeNotifier {
       notifyListeners();
     } catch (error) {
       rethrow;
+      //test
     }
   }
 }
