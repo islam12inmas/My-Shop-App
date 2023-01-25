@@ -39,7 +39,7 @@ class _ProductItemState extends State<ProductItem> {
               leading: Consumer<Product>(
                 builder: (context, product, child) => IconButton(
                     onPressed: () {
-                      product.makeFavorite();
+                      product.makeFavorite(widget.id!);
                     },
                     icon: Icon(
                       product.isFavorite!

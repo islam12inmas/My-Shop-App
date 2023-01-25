@@ -12,7 +12,7 @@ class MyCart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var cartData = Provider.of<Cart>(context);
-    var order = Provider.of<Orders>(context);
+    var order = Provider.of<Orders>(context ,listen: false);
     return Scaffold(
       appBar: AppBar(title: const Text("My Cart")),
       body: Column(children: [
@@ -31,7 +31,7 @@ class MyCart extends StatelessWidget {
                     label: Text("\$ ${cartData.totalPrice}"),
                     backgroundColor: Theme.of(context).primaryColor),
                 TextButton(
-                    onPressed: () {
+                    onPressed: cartData.itemCount==0? null :() {
                       order.addOrder(cartData.cartItems.values.toList(),
                           cartData.totalPrice!);
                       cartData.clearCart();
@@ -42,7 +42,7 @@ class MyCart extends StatelessWidget {
                                 Navigator.of(context).push(MaterialPageRoute(
                                     builder: (ctx) => OrdersScreen()));
                               }),
-                          content: Text("Order Placed!")));
+                          content: const Text("Order Placed!")));
                     },
                     child: const Text("ORDER NOW"))
               ],
