@@ -91,6 +91,22 @@ class AuthCard extends StatefulWidget {
 }
 
 class _AuthCardState extends State<AuthCard> {
+  void _showErrorDialog(String message) {
+    showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+              title: const Text("An Error Occurred"),
+              content: Text(message),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text("Ok"))
+              ],
+            ));
+  }
+
   final GlobalKey<FormState> _formKey = GlobalKey();
   AuthMode _authMode = AuthMode.Login;
   Map<String, String> _authData = {
@@ -111,9 +127,28 @@ class _AuthCardState extends State<AuthCard> {
     });
     if (_authMode == AuthMode.Login) {
       // Log user in
+      try {
+        await Provider.of<Auth>(context, listen: false)
+            .signin(_authData['email'], _authData['password']);
+      } on Exception catch (error) {
+        var errorMessage = error.toString();
+        _showErrorDialog(errorMessage);
+      } catch (error) {
+        var errorMessage = "Authentication Failed!";
+        _showErrorDialog(errorMessage);
+      }
     } else {
-      await Provider.of<Auth>(context, listen: false)
-          .signup(_authData['email'], _authData['password']);
+      try {
+        await Provider.of<Auth>(context, listen: false)
+            .signup(_authData['email'], _authData['password']);
+      } on Exception catch (error) {
+        var errorMessage = error.toString();
+        _showErrorDialog(errorMessage);
+      } catch (error) {
+        var errorMessage = "Authentication Failed!";
+        _showErrorDialog(errorMessage);
+      }
+
       // Sign user up
 
     }
@@ -157,7 +192,7 @@ class _AuthCardState extends State<AuthCard> {
                   decoration: const InputDecoration(labelText: 'E-Mail'),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
-                    if (value!.isEmpty || value.contains('@')) {
+                    if (value!.isEmpty) {
                       return 'Invalid email!';
                     }
                     return null;
