@@ -9,6 +9,7 @@ import 'package:max_udemy_course/widgets/203%20badge.dart';
 import 'package:max_udemy_course/widgets/grid_view_item.dart';
 import 'package:provider/provider.dart';
 
+import '../data/state_management/providers/auth.dart';
 import '../widgets/product_item.dart';
 
 enum FilterOptions { favorites, all }
@@ -22,13 +23,21 @@ class ProductOverviewScreen extends StatefulWidget {
 
 class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
   bool? showOnlyFavs = false;
+  var _isLoading = true;
 
   @override
   void initState() {
-   Provider.of<ProductsProvider>(context , listen: false).fetchProducts();
+    Provider.of<ProductsProvider>(context, listen: false)
+        .fetchProducts()
+        .then((_) {
+      setState(() {
+        _isLoading = false;
+      });
+    });
 
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     var productsData = Provider.of<ProductsProvider>(context);
@@ -36,34 +45,46 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
     return Scaffold(
       drawer: Drawer(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              AppBar(
-                title: const Text("My Shop"),
-              ),ListTile(
-                  leading: const Icon(Icons.shopping_cart),
-                  onTap: () {
-                    Navigator.of(context)
-                        .push(MaterialPageRoute(builder: (ctx) => const ProductOverviewScreen()));
-                  },
-                  title: const Text("My Shop ")),
-              ListTile(
-                  leading: const Icon(Icons.payment),
-                  onTap: () {
-                    Navigator.of(context)
-                        .push(MaterialPageRoute(builder: (ctx) => const OrdersScreen()));
-                  },
-                  title: const Text("My Orders")),
-              ListTile(
-                  leading: const Icon(Icons.edit),
-                  onTap: () {
-                    Navigator.of(context)
-                        .push(MaterialPageRoute(builder: (ctx) => MyProductsScreen()));
-                  },
-                  title: const Text("Manage Products ")) ,
-
-            ],
-          )),
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          AppBar(
+            title: const Text("My Shop"),
+          ),
+          ListTile(
+              leading: const Icon(Icons.shopping_cart),
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (ctx) => const ProductOverviewScreen()));
+              },
+              title: const Text("My Shop ")),
+          ListTile(
+              leading: const Icon(Icons.payment),
+              onTap: () {
+                Navigator.of(context).push(
+                    MaterialPageRoute(builder: (ctx) => const OrdersScreen()));
+              },
+              title: const Text("My Orders")),
+          ListTile(
+              leading: const Icon(Icons.edit),
+              onTap: () {
+                Navigator.of(context).push(
+                    MaterialPageRoute(builder: (ctx) => MyProductsScreen()));
+              },
+              title: const Text("Manage Products ")),
+          ListTile(
+              leading: const Icon(Icons.logout),
+              onTap: () {
+                Provider.of<Auth>(context, listen: false).logout();
+              },
+              title: const Text("Log out")),
+          ListTile(
+              leading: const Icon(Icons.refresh),
+              onTap: () {
+                Provider.of<Auth>(context, listen: false).tryAutoLogin();
+              },
+              title: const Text("Log out")),
+        ],
+      )),
       appBar: AppBar(
         actions: [
           PopupMenuButton(
@@ -100,7 +121,11 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
         ],
         title: const Text("My Shop"),
       ),
-      body: GridViewItem(showOnlyFavs!),
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : GridViewItem(showOnlyFavs!),
     );
   }
 }

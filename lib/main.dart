@@ -22,10 +22,28 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (ctx) => ProductsProvider()),
-        ChangeNotifierProvider(create: (ctx) => Cart()),
-        ChangeNotifierProvider(create: (ctx) => Orders()),
-        ChangeNotifierProvider(create: (ctx) => Auth())
+        ChangeNotifierProvider(create: (ctx) => Auth()),
+        ChangeNotifierProxyProvider<Auth, ProductsProvider>(
+          create: (BuildContext context) {
+            return ProductsProvider([]);
+          },
+          update: (BuildContext context, auth, previous) {
+            return ProductsProvider(previous!.products,
+                authToken: auth.token, userId: auth.userId);
+          },
+        ),
+        ChangeNotifierProxyProvider<Auth, Cart>(
+            create: (ctx) => Cart(),
+            update: ((context, auth, previous) {
+              return Cart();
+            })),
+        ChangeNotifierProxyProvider<Auth, Orders>(
+          create: (ctx) => Orders([]),
+          update: (context, auth, previous) {
+            return Orders(previous!.listOfOrders,
+                token: auth.token, userId: auth.userId);
+          },
+        )
       ],
       child: Consumer<Auth>(
         builder: (context, auth, _) {
@@ -37,11 +55,12 @@ class MyApp extends StatelessWidget {
                 accentColor: Colors.amber,
                 primarySwatch: Colors.cyan,
               ),
-              home: auth.isAuth ? ProductOverviewScreen() : AuthScreen(),
+              home: auth.token !=null? const ProductOverviewScreen() :
+            AuthScreen(),
               routes: {
                 EditProductScreen.routeName: (ctx) => EditProductScreen(),
                 CustomizeProductsScreen.routeName: (ctx) =>
-                    CustomizeProductsScreen()
+                    const CustomizeProductsScreen()
               });
         },
       ),

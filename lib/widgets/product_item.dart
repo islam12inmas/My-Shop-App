@@ -12,6 +12,8 @@ import 'package:max_udemy_course/data/state_management/providers/orders.dart';
 import 'package:max_udemy_course/widgets/cart_widget.dart';
 import 'package:provider/provider.dart';
 
+import '../data/state_management/providers/auth.dart';
+
 class ProductItem extends StatefulWidget {
   String? id;
   String? title;
@@ -30,6 +32,7 @@ class _ProductItemState extends State<ProductItem> {
     var productsData = Provider.of<ProductsProvider>(context, listen: false);
     final products = productsData.products;
     var cart = Provider.of<Cart>(context, listen: false);
+    var authData = Provider.of<Auth>(context, listen: false);
     print("rebuild");
     return ClipRRect(
       borderRadius: BorderRadius.circular(15),
@@ -39,7 +42,8 @@ class _ProductItemState extends State<ProductItem> {
               leading: Consumer<Product>(
                 builder: (context, product, child) => IconButton(
                     onPressed: () {
-                      product.makeFavorite(widget.id!);
+                      product.makeFavorite(
+                          authData.token, authData.userId);
                     },
                     icon: Icon(
                       product.isFavorite!

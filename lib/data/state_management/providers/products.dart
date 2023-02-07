@@ -6,6 +6,11 @@ import 'package:http/http.dart' as http;
 import 'product.dart';
 
 class ProductsProvider with ChangeNotifier {
+  final String? authToken;
+  final String? userId;
+
+  ProductsProvider(this._products, {this.authToken, this.userId});
+
   List<Product> _products = [
     Product(
       id: 'p1',
@@ -51,7 +56,7 @@ class ProductsProvider with ChangeNotifier {
 
   addProduct(Product product) async {
     final url = Uri.parse(
-        'https://course-udemy-max-default-rtdb.firebaseio.com/products.json');
+        'https://course-udemy-max-default-rtdb.firebaseio.com/products.json?auth=$authToken');
     try {
       final response = await http.post(url,
           body: json.encode({
@@ -59,7 +64,7 @@ class ProductsProvider with ChangeNotifier {
             'description': product.description,
             'price': product.price,
             'imageUrl': product.imageUrl,
-            'isFavorite': product.isFavorite
+            'creatorID': userId
           }));
 
       final newProduct = Product(
@@ -81,7 +86,7 @@ class ProductsProvider with ChangeNotifier {
 
   Future<void> updateProduct(String id, Product newProduct) async {
     final url = Uri.parse(
-        'https://course-udemy-max-default-rtdb.firebaseio.com/products/$id.json');
+        'https://course-udemy-max-default-rtdb.firebaseio.com/products/$id.json?auth=$authToken');
     await http.patch(url,
         body: json.encode({
           'title': newProduct.title,
@@ -99,7 +104,7 @@ class ProductsProvider with ChangeNotifier {
 
   Future<void> deleteProduct(String id) async {
     final url = Uri.parse(
-        'https://course-udemy-max-default-rtdb.firebaseio.com/products/$id.json');
+        'https://course-udemy-max-default-rtdb.firebaseio.com/products/$id.json?auth=$authToken');
     var index = _products.indexWhere((element) => element.id == id);
     Product? deletedProduct = _products[index];
     _products.removeWhere((element) => element.id == id);
@@ -114,17 +119,22 @@ class ProductsProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> fetchProducts() async {
-    final url = Uri.parse(
-        'https://course-udemy-max-default-rtdb.firebaseio.com/products.json');
+  Future<void> fetchProducts([bool filter = false]) async {
+    final filtering = filter ? 'orderBy="creatorId"&equalTo="$userId"' : '';
+    var url = Uri.parse(
+        'https://course-udemy-max-default-rtdb.firebaseio.com/products.json?auth=$authToken&$filtering');
     try {
       final response = await http.get(url);
       var decoded = json.decode(response.body) as Map<String, dynamic>;
+      url = Uri.parse(
+          'https://course-udemy-max-default-rtdb.firebaseio.com/userFavorites/$userId.json?auth=$authToken');
+      var favResponse = await http.get(url);
+      var favData = json.decode(favResponse.body);
       List<Product> productList = [];
       decoded.forEach((id, prod) {
         productList.add(Product(
             id: id,
-            isFavorite: prod['isFavorite'],
+            isFavorite: favData == null ? false : favData[id] ?? false,
             description: prod['description'],
             imageUrl: prod['imageUrl'],
             title: prod['title'],

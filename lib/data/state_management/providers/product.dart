@@ -20,15 +20,15 @@ class Product with ChangeNotifier {
     this.isFavorite = false,
   });
 
-  Future<void> makeFavorite(String? id) async {
+  Future<void> makeFavorite( String? token, String? userId) async {
     final url = Uri.parse(
-        'https://course-udemy-max-default-rtdb.firebaseio.com/products/$id.json');
+        'https://course-udemy-max-default-rtdb.firebaseio.com/userFavorites/$userId/$id.json?auth=$token');
 
     isFavorite = !isFavorite!;
     var oldFav = isFavorite;
     notifyListeners();
     try {
-      await http.patch(url, body: json.encode({'isFavorite': isFavorite}));
+      await http.put(url, body: json.encode(isFavorite));
     } catch (error) {
       isFavorite = oldFav;
     }

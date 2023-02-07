@@ -8,15 +8,35 @@ import 'package:provider/provider.dart';
 
 import 'orders_screen.dart';
 
-class MyProductsScreen extends StatelessWidget {
+class MyProductsScreen extends StatefulWidget {
   const MyProductsScreen({super.key});
+
+  @override
+  State<MyProductsScreen> createState() => _MyProductsScreenState();
+}
+
+class _MyProductsScreenState extends State<MyProductsScreen> {
+  @override
+  var _isLoading = true;
+
+  @override
+  void initState() {
+    Provider.of<ProductsProvider>(context, listen: false)
+        .fetchProducts(true)
+        .then((_) {
+      setState(() {
+        _isLoading = false;
+      });
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     var productsData = Provider.of<ProductsProvider>(context);
     Future<void> _refreshProducts() async {
       await Provider.of<ProductsProvider>(context, listen: false)
-          .fetchProducts();
+          .fetchProducts(true);
     }
 
     return Scaffold(
@@ -58,20 +78,23 @@ class MyProductsScreen extends StatelessWidget {
             },
             icon: const Icon(Icons.add))
       ]),
-      body: RefreshIndicator(
-        onRefresh: _refreshProducts,
-
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: ListView.builder(
-            itemBuilder: (ctx, i) => ManageProductsItem(
-                id: productsData.products[i].id,
-                title: productsData.products[i].title,
-                imageUrl: productsData.products[i].imageUrl),
-            itemCount: productsData.products.length,
-          ),
-        ),
-      ),
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : RefreshIndicator(
+              onRefresh: _refreshProducts,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ListView.builder(
+                  itemBuilder: (ctx, i) => ManageProductsItem(
+                      id: productsData.products[i].id,
+                      title: productsData.products[i].title,
+                      imageUrl: productsData.products[i].imageUrl),
+                  itemCount: productsData.products.length,
+                ),
+              ),
+            ),
     );
   }
 }

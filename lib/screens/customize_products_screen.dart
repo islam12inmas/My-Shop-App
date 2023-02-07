@@ -37,6 +37,7 @@ class _CustomizeProductsScreenState extends State<CustomizeProductsScreen> {
 
   @override
   void initState() {
+
     _imageUrlFocusNode.addListener(_updateImageUrl);
     super.initState();
   }

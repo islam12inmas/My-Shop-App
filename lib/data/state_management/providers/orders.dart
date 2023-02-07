@@ -15,21 +15,25 @@ class Order {
 }
 
 class Orders with ChangeNotifier {
+  String? token;
+String? userId;
+  Orders(this._orders, {this.token , this.userId});
+
   List<Order> _orders = [];
 
   List<Order> get listOfOrders {
     return [..._orders];
   }
 
-  Future<void> fetchOrders() async {
+  Future<dynamic> fetchOrders() async {
     final url = Uri.parse(
-        'https://course-udemy-max-default-rtdb.firebaseio.com/orders.json');
+        'https://course-udemy-max-default-rtdb.firebaseio.com/orders/$userId.json?auth=$token');
     var response = await http.get(url);
-    var decoded = json.decode(response.body) as Map<String, dynamic>;
-    List<Order> newOrders = [];
-   if(decoded == null){
-     return;
-   }
+    final decoded = json.decode(response.body) as Map<String, dynamic>;
+    final List<Order> newOrders = [];
+    if (decoded == null) {
+      return{};
+    }
     decoded.forEach((id, order) {
       newOrders.add(Order(
           id: id,
@@ -50,7 +54,7 @@ class Orders with ChangeNotifier {
   Future<void> addOrder(List<CartItem> cartProducts, double amount) async {
     DateTime dateNow = DateTime.now();
     final url = Uri.parse(
-        'https://course-udemy-max-default-rtdb.firebaseio.com/orders.json');
+        'https://course-udemy-max-default-rtdb.firebaseio.com/orders/$userId.json?auth=$token');
     final response = await http.post(url,
         body: json.encode({
           'amount': amount,

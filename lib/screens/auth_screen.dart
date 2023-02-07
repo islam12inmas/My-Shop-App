@@ -217,7 +217,7 @@ class _AuthCardState extends State<AuthCard> {
                 if (_authMode == AuthMode.Signup)
                   TextFormField(
                     enabled: _authMode == AuthMode.Signup,
-                    decoration: InputDecoration(labelText: 'Confirm Password'),
+                    decoration: const InputDecoration(labelText: 'Confirm Password'),
                     obscureText: true,
                     validator: _authMode == AuthMode.Signup
                         ? (value) {
@@ -231,7 +231,7 @@ class _AuthCardState extends State<AuthCard> {
                   height: 20,
                 ),
                 if (_isLoading)
-                  CircularProgressIndicator()
+                  const CircularProgressIndicator()
                 else
                   ElevatedButton(
                     onPressed: _submit,
